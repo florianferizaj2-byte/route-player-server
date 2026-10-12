@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>路线定位 · 卡密管理</title><link rel="stylesheet" href="/admin/style.css"><script src="/admin/app.js" defer></script></head>
+<body><header><div class="brand"><span class="mark" aria-hidden="true">R</span><div><strong>路线定位</strong><span>账号与卡密管理</span></div></div><button id="logout" hidden>退出登录</button></header>
+<main><p id="notice" role="status" aria-live="polite"></p>
+<section id="loginPanel" class="login card"><p class="eyebrow">管理后台</p><h1>登录管理员账号</h1><p class="muted">首次运行的账号和密码保存在服务器的 admin-login.txt 中。</p>
+<form id="loginForm"><label>账号<input name="username" autocomplete="username" required></label><label>密码<input name="password" type="password" autocomplete="current-password" required minlength="8"></label><button class="primary" type="submit">登录</button></form></section>
+<div id="dashboard" hidden><div class="pageTitle"><div><p class="eyebrow">卡密管理</p><h1>管理激活与有效期</h1><p class="muted">卡密首次激活后开始计时，每张卡绑定一个账号和一台设备。</p></div><span id="adminName" class="pill"></span></div>
+<section class="card"><h2>批量生成卡密</h2><form id="generateForm" class="grid">
+<label>批次名称<input name="label" maxlength="120" placeholder="例如：十月体验卡" required></label>
+<label>数量<input name="count" type="number" value="10" min="1" max="500" required></label>
+<label>有效天数<input name="durationDays" type="number" value="30" min="0.0001" max="3650" step="any" required></label>
+<label>最晚激活时间（可选）<input name="redeemBefore" type="datetime-local"></label>
+<button type="submit" class="primary">生成卡密</button></form>
+<div id="generated" hidden class="generated"><h3>本批次卡密已生成</h3><p>完整卡密只在本次生成后显示，请下载保存。后台保存的是卡密校验摘要。</p><button id="downloadCodes">下载 CSV</button><textarea id="codes" rows="5" readonly aria-label="本批次卡密"></textarea><button id="clearCodes">收起并清除本次显示</button></div></section>
+<section class="card"><div class="sectionTitle"><h2>卡密列表 <span id="total" class="count"></span></h2><button id="refresh">刷新</button></div>
+<form id="searchForm" class="search"><label>搜索<input id="search" placeholder="批次、账号或卡密尾号"></label><button type="submit">搜索</button></form>
+<div class="tableWrap"><table><thead><tr><th>批次 / 尾号</th><th>状态</th><th>有效期</th><th>绑定账号 / 设备</th><th>操作</th></tr></thead><tbody id="cards"></tbody></table></div><p id="empty" hidden class="muted">暂无卡密，先生成一批。</p>
+<div class="pages"><button id="previous">上一页</button><span id="page"></span><button id="next">下一页</button></div></section>
+<section class="card"><div class="sectionTitle"><h2>注册账号</h2><button id="loadUsers">查看账号</button></div><ul id="users" class="userList"></ul></section>
+</div></main>
+<dialog id="editDialog"><form id="editForm"><h2>调整有效期</h2><p id="editHint" class="muted"></p><label id="daysRow">有效天数<input id="editDays" type="number" min="0.0001" max="3650" step="any"></label><label id="expiryRow">到期时间<input id="editExpiry" type="datetime-local"></label><div class="actions"><button type="button" id="cancelEdit">取消</button><button class="primary" type="submit">保存</button></div></form></dialog>
+<dialog id="confirmDialog"><h2 id="confirmTitle"></h2><p id="confirmBody"></p><div class="actions"><button id="cancelConfirm">取消</button><button id="acceptConfirm" class="primary">确认</button></div></dialog>
+</body></html>

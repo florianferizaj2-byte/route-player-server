@@ -1,0 +1,15 @@
+data/
+backups/
+test-output/
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+*.pid
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
+Thumbs.db

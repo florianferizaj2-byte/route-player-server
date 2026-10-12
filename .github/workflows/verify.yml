@@ -1,0 +1,67 @@
+name: Verify server and deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Test server HTTP flows
+        run: npm test
+      - name: Validate Compose configuration
+        env:
+          ROUTE_DOMAIN: ci.example.com
+        run: |
+          docker compose config --quiet
+          docker compose -f compose.yaml -f deploy/compose.https.yaml config --quiet
+      - name: Build and check deployed server
+        run: |
+          set -euo pipefail
+          docker build -t route-player-server:ci .
+          docker volume create route-player-test-data
+          start_container() {
+            docker run --detach --name route-player-test \
+              --read-only --tmpfs /tmp --cap-drop ALL \
+              --security-opt no-new-privileges:true \
+              --publish 127.0.0.1:18790:8790 \
+              --volume route-player-test-data:/app/data route-player-server:ci
+            for attempt in $(seq 1 30); do
+              if curl --fail --silent http://127.0.0.1:18790/health > /tmp/route-health.json; then
+                node -e "const b=require('/tmp/route-health.json');if(b.status!=='ok'||b.service!=='route-player')process.exit(1)"
+                return 0
+              fi
+              sleep 1
+            done
+            docker logs route-player-test
+            return 1
+          }
+          start_container
+          curl --fail --silent http://127.0.0.1:18790/admin > /tmp/route-admin.html
+          grep -q '路线定位' /tmp/route-admin.html
+          before=$(docker exec route-player-test sha256sum /app/data/accounts.json /app/data/admin-login.txt)
+          docker rm --force route-player-test
+          start_container
+          after=$(docker exec route-player-test sha256sum /app/data/accounts.json /app/data/admin-login.txt)
+          test "$before" = "$after"
+      - name: Validate HTTPS proxy configuration
+        run: |
+          docker run --rm --env ROUTE_DOMAIN=ci.example.com \
+            --volume "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+      - name: Clean CI resources
+        if: always()
+        run: |
+          docker rm --force route-player-test || true
+          docker volume rm route-player-test-data || true

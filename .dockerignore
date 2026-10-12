@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.env.*
+data
+backups
+test-output
+node_modules
+test
+docs
+*.log
+*.pid
+*.pem
+*.key
+*.p12
+*.pfx

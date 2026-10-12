@@ -1,0 +1,10 @@
+This repository contains the independently deployable account and route-backup
+server prepared for the Route Player Android application.
+
+The application project is based on GPS Locator by 0xfnzero:
+https://github.com/0xfnzero/gps-locator
+Baseline commit: 21ee0419ca4bcc7b2a32e9bb2108fbecd624e9f7
+
+The original MIT license and copyright notice are preserved in LICENSE.
+The Android app, its dependencies, and the legacy anonymous cloud-server are
+not included in this server-only repository.

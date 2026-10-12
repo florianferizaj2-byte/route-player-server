@@ -1,0 +1,27 @@
+name: route-player-server
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    init: true
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8790
+      ROUTE_DATA_DIR: /app/data
+      ROUTE_ADMIN_USERNAME: ${ROUTE_ADMIN_USERNAME:-admin}
+      ROUTE_HTTPS: ${ROUTE_HTTPS:-false}
+    ports:
+      - "127.0.0.1:${PORT:-8790}:8790"
+    volumes:
+      - route-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  route-data:
